@@ -6,6 +6,9 @@ class CycleIterator:
         self.length = len(base_list)
         self.counter = -1
 
+    def __iter__(self):
+        return self
+
     def __next__(self):
         if self.counter == self.length-1:
             self.counter = -1
@@ -18,3 +21,6 @@ iterator = CycleIterator([1, 2, 3])
 
 for i in range(10):
     print(next(iterator))
+
+for el in iterator:
+    print(el)

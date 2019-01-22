@@ -1,4 +1,5 @@
 class CycleIterator:
+    """Iterator that infinitely loops over a collection"""
 
     def __init__(self, base_list):
         self.base_list = base_list

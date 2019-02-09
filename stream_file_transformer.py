@@ -1,6 +1,8 @@
 """
 This module implements StreamFileTransformer class, which can take very big
-file, that doesn't fit into RAM and process it chunk by chunk with multiple processes using target provided. Target takes chunk and make whatever transformations you want.
+file, that doesn't fit into RAM and process it chunk by chunk with multiple
+processes using target provided.
+Target takes chunk and make whatever transformations you want.
 """
 
 import os

@@ -1,53 +1,95 @@
-"""
-This module implements StreamFileTransformer class, which can take very big
-file, that doesn't fit into RAM and process it chunk by chunk with multiple
-processes using target provided.
-Target takes chunk and make whatever transformations you want.
-"""
+"""This module implements StreamFileMapper class for filtering big files in a stream"""
 
 import os
-import itertools
 import multiprocessing
-import numpy as np
+import subprocess
+import glob
+import re
 
 
-def test_target(data):
-    '''Example target'''
-    return len(data)
-
-
-class StreamFileTransformer:
-    def __init__(self, path, target, chunk_size=1024, n_jobs=1):
+class StreamFileMapper:
+    def __init__(self, path, target, chunk_size=1024,
+                 n_jobs=1, line_by_line=False, keep_orig_file=True):
         self.path = path
         self.target = target
         self.chunk_size = chunk_size
         self.n_jobs = n_jobs
+        self.line_by_line = line_by_line
+        self.f_head, self.f_tail = os.path.split(self.path)
+        self.f_body, self.f_ext = os.path.splitext(self.f_tail)
+        self.keep_orig_file = keep_orig_file
 
-    def read_file_in_chunks(self, f):
-        """Generator object to read file chunk by chunk
-        without loading the whole file into RAM"""
+    @property
+    def file_size(self):
+        bytes_len = subprocess.check_output(['stat', '--printf="%s"', self.path])
+        return int(bytes_len.decode('utf-8')[1:-1])
+
+    @property
+    def num_lines(self):
+        bytes_len = subprocess.check_output(['wc', '-l', self.path])
+        return int(bytes_len.decode('utf-8')[0:-1].split(' ')[0])
+
+    def _read_file_in_stream(self, f):
         while True:
-            chunk = f.read(self.chunk_size)
+            chunk = next(f, None) if self.line_by_line else f.read(self.chunk_size)
             if not chunk:
                 break
             yield chunk
 
-    def process_chunk(self, chunk):
+    def _split_file(self):
+        split_by = '-l' if self.line_by_line else '-b'
+        if self.line_by_line:
+            split_size = self.num_lines // self.n_jobs + 1
+        else:
+            split_size = self.file_size // self.n_jobs + 1
+
+        output_prefix = os.path.join(self.f_head, '.' + self.f_body)
+
+        subprocess.check_call([
+            'split',
+            '--numeric-suffixes',
+            str(split_by),
+            str(split_size),
+            self.path,
+            output_prefix
+        ])
+
+        if not self.keep_orig_file:
+            subprocess.Popen(['rm', self.path])
+
+        splited_fnames = glob.glob(os.path.join(self.f_head, '.{}*'.format(self.f_body)))
+
+        return splited_fnames
+
+    def _process_chunk(self, chunk):
+        return self.target(chunk)
+
+    def _process_file_in_stream(self, f):
+        for chunk in self._read_file_in_stream(f):
+            yield self._process_chunk(chunk)
+
+    def _open_process_save(self, filename):
+        filename_copy = filename+'_processed'
+        with open(filename, 'r') as f, open(filename_copy, 'a+') as f_copy:
+            for processed_chunk in self._process_file_in_stream(f):
+                f_copy.write(processed_chunk)
+        return filename_copy
+
+    def _clean_garbage(self):
+        for f in os.listdir(self.f_head):
+            if re.search('.{}'.format(self.f_body), f):
+                os.remove(os.path.join(self.f_head, f))
+
+    def map(self):
+        splited_fnames = self._split_file()
         with multiprocessing.Pool(self.n_jobs) as P:
-            groups = np.array_split(np.array(list(chunk)), self.n_jobs)
-            groups = [''.join(group) for group in groups]
-            processed_groups = P.map(self.target, groups)
-            return ''.join(list(itertools.chain.from_iterable(processed_groups)))
+            splited_fnames_processed = P.map(self._open_process_save, splited_fnames)
 
-    def process_file(self):
-        body, ext = os.path.splitext(self.path)
-        path_copy = body + '_copy' + ext
-        with open(self.path, 'r') as f, open(path_copy, 'w+') as f_copy:
-            for chunk in self.read_file_in_chunks(f):
-                processed = self.process_chunk(chunk)
-                f_copy.write(processed)
+        output_file = os.path.join(self.f_head, self.f_body + '_processed' + self.f_ext)
+        subprocess.check_call(['touch', output_file])
 
+        subprocess.check_call(
+            ' '.join(['cat', *splited_fnames_processed, '>>', output_file]), shell=True)
 
-if __name__ == "__main__":
-    #example usage
-    transformer = StreamFileTransfomer("path/to/my/file", test_target, n_jobs='your processes number')
+        self._clean_garbage()
+ 

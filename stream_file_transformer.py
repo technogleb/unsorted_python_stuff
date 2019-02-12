@@ -92,4 +92,14 @@ class StreamFileMapper:
             ' '.join(['cat', *splited_fnames_processed, '>>', output_file]), shell=True)
 
         self._clean_garbage()
- 
+
+
+if __name__ == "__main__":
+    """Example usage"""
+    mapper = StreamFileMapper(
+        path="path/to/my/big/file.ext",
+        target="my_mapper_funcion",
+        n_jobs=10,
+        line_by_line=True,
+        keep_orig_file=False
+    )

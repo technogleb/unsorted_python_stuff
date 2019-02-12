@@ -103,3 +103,5 @@ if __name__ == "__main__":
         line_by_line=True,
         keep_orig_file=False
     )
+
+    mapper.map()

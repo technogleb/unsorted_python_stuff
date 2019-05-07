@@ -4,10 +4,10 @@ Context manager to work with postgresql python adapter (psycopg2).
 Usage example:
 --------------
 >>> db = DatabaseHandler(user='user', password='password', server='host', database='postgres')
-	with db:
-        res = db.execute(sql, params)
-        for row in res:
-            do_something(row)
+with db:
+	res = db.execute(sql, params)
+    for row in res:
+		do_something(row)
 """
 
 

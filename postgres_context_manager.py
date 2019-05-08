@@ -13,7 +13,7 @@ with db:
 
 class DatabaseHandler:
     def __init__(self, user='postgres', password='postgres',
-                 server='10.102.0.10', database='postgres'):
+                 server='ipv4', database='postgres'):
         self.user = user
         self._password = password
         self.server = server

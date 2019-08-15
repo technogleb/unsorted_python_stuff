@@ -56,37 +56,37 @@ class DatabaseHandler:
 
     @host.setter
     def host(self, signature_host):
-        gp_host = os.getenv('GP_HOST')
+        gp_host = os.getenv('POSTGRES_HOST')
         if gp_host:
             self._host = gp_host
         elif signature_host:
             self._host = signature_host
         else:
-            self._host = input("Enter greenplum hostname or ip: ")
+            self._host = input("Enter postgres hostname or ip: ")
 
     @dbname.setter
     def dbname(self, signature_dbname):
-        gp_dbname = os.getenv('GP_DBNAME')
+        gp_dbname = os.getenv('POSTGRES_DBNAME')
         if gp_dbname:
             self._dbname = gp_dbname
         elif signature_dbname:
             self._dbname = signature_dbname
         else:
-            self._dbname = input("Enter greenplum dbname: ")
+            self._dbname = input("Enter postgres dbname: ")
 
     @user.setter
     def user(self, signature_user):
-        gp_user = os.getenv('GP_USER')
+        gp_user = os.getenv('POSTGRES_USER')
         if gp_user:
             self._user = gp_user
         elif signature_user:
             self._user = signature_user
         else:
-            self._user = input("Enter greenplum username: ")
+            self._user = input("Enter postgres username: ")
 
     @password.setter
     def password(self, signature_password):
-        gp_pass = os.getenv('GP_PASSWORD')
+        gp_pass = os.getenv('POSTGRES_PASSWORD')
         if gp_pass:
             self._password = gp_pass
         elif signature_password:

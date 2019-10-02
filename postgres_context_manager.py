@@ -5,13 +5,21 @@ Usage example:
 --------------
 >>> db = DatabaseHandler(user='user', password='password', server='host', database='postgres')
 with db:
-	res = db.execute(sql, params)
+    res = db.execute(sql, params)
     for row in res:
-		do_something(row)
+        do_something(row)
 """
+
+import getpass
+import psycopg2
+from psycopg2 import extras
 
 
 class DatabaseHandler:
+    """
+    Context manager, that helps your write a little bit less code
+    when working with psycopg2
+    """
     def __init__(self, user='postgres', password='postgres',
                  server='ipv4', database='postgres'):
         self.user = user
@@ -22,6 +30,7 @@ class DatabaseHandler:
         self.cursor = None
 
     def execute(self, sql, params=None):
+        """Executes sql query here"""
         self.cursor.execute(sql, params)
         return self.cursor
 

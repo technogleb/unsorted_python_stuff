@@ -2,6 +2,11 @@
 Tool for 'leave-one-out' testing features in dataset.
 Adds use_column parameter for lightgbm CLI, which works
 like an opposite one to ignore_columns.
+
+Example usage
+--------------
+>>> python lgbm_tool.py --use_column=column1,column2,column3 \
+>>>                     config=path_to_config data=path_to_data valid=path_to_valid
 """
 import argparse
 import subprocess

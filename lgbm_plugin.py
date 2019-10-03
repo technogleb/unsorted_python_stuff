@@ -75,7 +75,7 @@ def run_lgbm(args: dict) -> None:
 
     ignore_string = _generate_ignore_string(features, use_columns)
 
-    subprocess.Popen(
+    subprocess.call(
         [
             'lightgbm',
             f'ignore_column={ignore_string}',

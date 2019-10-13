@@ -16,6 +16,7 @@ class StoppableFlask(flask.Flask):
         self.run_proxy = None
 
     def run(self, *args, **kwargs):
+        """Runs flask in separate subprocess"""
         self.run_proxy = mp.Process(target=super().run, args=args, kwargs=kwargs)
         self.run_proxy.start()
 

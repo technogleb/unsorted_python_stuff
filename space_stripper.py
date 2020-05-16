@@ -40,6 +40,8 @@ def main():
 		line_clear = replace_spaces(line, sep=sep)
 		f_w.write(line_clear+'\n')
 	replace_file(filename)
+	f_w.close()
+	f_r.close()
 
 
 if __name__ == "__main__":

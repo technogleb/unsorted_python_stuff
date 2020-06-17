@@ -1,3 +1,4 @@
+"""Just a funny script, that cannot be stopped using ctr-c combination"""
 import time
 import inspect
 

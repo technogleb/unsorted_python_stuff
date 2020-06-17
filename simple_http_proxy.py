@@ -21,21 +21,23 @@ def run():
         client_request = client_socket.recv(1024).decode('utf-8')
         print(client_request)
 
-        if client_addr[0] == '127.0.0.1':
-            hostname = client_request.split()[1].split('/')[2]
-            ip = socket.gethostbyname(hostname)
-            target_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            target_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-            print(ip)
-            target_socket.bind((ip, 80))
-
-        else:
-            ip = '127.0.0.1'
-            target_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            target_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-            target_socket.bind((ip, 5000))
-
+        print("oooooooooooooooo Client access ooooooooooooooooo")
+        hostname = client_request.split()[1].split('/')[2]
+        print(hostname)
+        ip = socket.gethostbyname(hostname)
+        target_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        target_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        print(ip)
+        target_socket.connect((ip, 80))
+        print('oooooooooooooooooooooooooooooooooooooooooooooooo')
         target_socket.sendall(client_request.encode())
+        print('here')
+        # server_socket, server_addr = proxy_socket.accept()
+        target_response = target_socket.recv(1024)
+        print(target_response)
+        client_socket.sendall(target_response)
+
+        target_socket.close()
 
 
 if __name__ == "__main__":
